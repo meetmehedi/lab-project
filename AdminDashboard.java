@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 public class AdminDashboard extends JPanel {
     public AdminDashboard(User admin) {
@@ -27,7 +28,7 @@ public class AdminDashboard extends JPanel {
                 // Show dialog for adding teacher
                 String username = JOptionPane.showInputDialog("Enter Teacher Username:");
                 String password = JOptionPane.showInputDialog("Enter Teacher Password:");
-                ((Admin) admin).addTeacher(username, password, LoginUI.users);
+                ((Admin) admin).addTeacher(username, password, Main.USER_LIST);
             }
         });
 
@@ -37,7 +38,7 @@ public class AdminDashboard extends JPanel {
                 // Show dialog for adding student
                 String username = JOptionPane.showInputDialog("Enter Student Username:");
                 String password = JOptionPane.showInputDialog("Enter Student Password:");
-                ((Admin) admin).addStudent(username, password, LoginUI.users);
+                ((Admin) admin).addStudent(username, password, Main.USER_LIST);
             }
         });
 
@@ -47,5 +48,40 @@ public class AdminDashboard extends JPanel {
                 System.exit(0); // Logout and close the app
             }
         });
+    }
+}
+
+
+ class Admin extends User {
+    public Admin(String username, String password) {
+        super(username, password);
+    }
+
+    @Override
+    public void menu() {
+        System.out.println("Admin Menu:\n1. Add Teacher\n2. Add Student\n3. Logout");
+    }
+
+    public void addTeacher(String username, String password, java.util.List<User> users) {
+        Teacher teacher = new Teacher(username, password);
+        users.add(teacher);
+        System.out.println("Teacher added successfully.");
+    }
+
+    public static class Teacher extends User {
+        public Teacher(String username, String password) {
+            super(username, password);
+        }
+
+        @Override
+        public void menu() {
+            System.out.println("Teacher Menu:\n1. View Classes\n2. Logout");
+        }
+    }
+
+    public void addStudent(String username, String password, List<User> users) {
+        Student student = new Student(username, password);
+        users.add(student);
+        System.out.println("Student added successfully.");
     }
 }
