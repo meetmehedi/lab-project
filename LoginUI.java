@@ -15,8 +15,7 @@ public class LoginUI {
         JPanel panel = new JPanel();
         frame.add(panel);
         placeComponents(panel);
-
-        // Create Admin and Teacher for testing
+        
         Admin admin = new Admin("admin", "admin123");
         Teacher teacher = new Teacher("teacher", "teacher123");
         users.add(admin);
@@ -54,7 +53,6 @@ public class LoginUI {
                 String username = userText.getText();
                 String password = new String(passwordText.getPassword());
 
-                // Validate user credentials
                 User currentUser = users.stream()
                         .filter(user -> user.username.equals(username) && user.password.equals(password))
                         .findFirst().orElse(null);
@@ -72,7 +70,6 @@ public class LoginUI {
     private static void openDashboard(User currentUser) {
         JFrame dashboardFrame = new JFrame(currentUser.username + " Dashboard");
 
-        // Depending on the user type, show the appropriate menu
         if (currentUser instanceof Admin) {
             dashboardFrame.setContentPane(new AdminDashboard(currentUser));
         } else if (currentUser instanceof Teacher) {
