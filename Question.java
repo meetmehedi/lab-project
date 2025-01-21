@@ -1,6 +1,7 @@
+import java.util.ArrayList;
 import java.util.List;
 
-class Question {
+public class Question {
     private String questionText;
     private List<String> options;
     private String correctAnswer;
@@ -11,8 +12,32 @@ class Question {
         this.correctAnswer = correctAnswer;
     }
 
+    public String getQuestionText() {
+        return questionText;
+    }
+
+    public void setQuestionText(String questionText) {
+        this.questionText = questionText;
+    }
+
+    public List<String> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<String> options) {
+        this.options = options;
+    }
+
     public String getCorrectAnswer() {
         return correctAnswer;
+    }
+
+    public void setCorrectAnswer(String correctAnswer) {
+        this.correctAnswer = correctAnswer;
+    }
+
+    public boolean isCorrect(String answer) {
+        return correctAnswer != null && correctAnswer.equalsIgnoreCase(answer.trim());
     }
 
     @Override
@@ -25,5 +50,33 @@ class Question {
         }
 
         return sb.toString();
+    }
+}
+
+
+ class QuizTopic {
+    private String topicName;
+    private List<Question> questions;
+
+    public QuizTopic(String topicName) {
+        this.topicName = topicName;
+        this.questions = new ArrayList<>();
+    }
+
+    public String getTopicName() {
+        return topicName;
+    }
+
+    public List<Question> getQuestions() {
+        return questions;
+    }
+
+    public void addQuestion(Question question) {
+        questions.add(question);
+    }
+
+    @Override
+    public String toString() {
+        return "Quiz Topic: " + topicName + ", Total Questions: " + questions.size();
     }
 }
