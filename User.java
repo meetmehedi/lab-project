@@ -1,5 +1,6 @@
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public abstract class User {
     private final String username;
@@ -41,28 +42,47 @@ class Admin extends User {
     }
 }
 
+
 class Student extends User {
     private final List<Integer> scores = new ArrayList<>(); // Store scores for quizzes
 
     public Student(String username, String password) {
         super(username, password);
     }
-
+    public double getAverageScore() {
+        if (scores.isEmpty()) return 0.0;
+        return scores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+    }
+    // Get all quiz scores
     public List<Integer> getScores() {
-        return scores;
+        return Collections.unmodifiableList(scores); // Return an unmodifiable view to ensure encapsulation
     }
 
+    // Add a new quiz score
     public void addScore(int score) {
+        if (score < 0) {
+            throw new IllegalArgumentException("Score cannot be negative.");
+        }
         scores.add(score);
     }
 
-    public double getAverageScore() {
-        return scores.stream().mapToInt(Integer::intValue).average().orElse(0.0);
-    }
 
+
+    // Display the student-specific menu
     @Override
     public void menu() {
-        System.out.println("Student Menu");
+        /**System.out.println("\n--- Student Menu ---");
+        System.out.println("1. View Quiz Topics");
+        System.out.println("2. Take a Quiz");
+        System.out.println("3. View Scores");
+        System.out.println("4. Logout");
+        System.out.println("---------------------");**/
+    }
+
+    // To display leaderboard details
+    @Override
+    public String toString() {
+        return getUsername() + " - Average Score: " + String.format("%.2f", getAverageScore());
     }
 }
 
