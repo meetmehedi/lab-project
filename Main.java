@@ -1,33 +1,36 @@
 import javax.swing.*;
+import java.awt.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
     public static final List<User> USER_LIST = new ArrayList<>();
-    private static final String LOGIN_SUCCESS_MESSAGE = "Login Successful! Welcome ";
-    private static final String LOGIN_FAILURE_MESSAGE = "Invalid username or password.";
+    public static User currentUser;
 
     public static void main(String[] args) {
+        // Add default users
+        USER_LIST.add(new Admin("admin", "admin123"));
+        // USER_LIST.add(new Teacher("teacher", "teacher123"));
+        // USER_LIST.add(new Student("student", "student123"));
+
+        // Show login window
+        SwingUtilities.invokeLater(Main::showLoginWindow);
+    }
+
+    public static void showLoginWindow() {
         JFrame frame = new JFrame("QuickWitt - Login");
         frame.setSize(400, 200);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel loginPanel = new JPanel();
-        frame.add(loginPanel);
-        configureLoginPanel(loginPanel);
-
-        // Initialize testing data
-        USER_LIST.add(new Admin("admin", "admin123"));
-        USER_LIST.add(new Admin.Teacher("teacher", "teacher123"));
-
-        frame.setVisible(true);
-    }
-
-    private static void configureLoginPanel(JPanel loginPanel) {
         loginPanel.setLayout(null);
+        loginPanel.setBackground(new Color(0, 105, 148));
 
         JLabel userLabel = new JLabel("Username:");
         userLabel.setBounds(10, 20, 80, 25);
+        userLabel.setForeground(Color.WHITE);
         loginPanel.add(userLabel);
 
         JTextField userText = new JTextField(20);
@@ -36,6 +39,7 @@ public class Main {
 
         JLabel passwordLabel = new JLabel("Password:");
         passwordLabel.setBounds(10, 50, 80, 25);
+        passwordLabel.setForeground(Color.WHITE);
         loginPanel.add(passwordLabel);
 
         JPasswordField passwordText = new JPasswordField(20);
@@ -43,43 +47,73 @@ public class Main {
         loginPanel.add(passwordText);
 
         JButton loginButton = new JButton("Login");
-        loginButton.setBounds(10, 80, 150, 25);
+        loginButton.setBounds(100, 90, 100, 25);
+        loginButton.setBackground(Color.WHITE);
+        loginButton.setForeground(new Color(0, 105, 148));
         loginPanel.add(loginButton);
 
-        loginButton.addActionListener(e -> handleLogin(userText.getText(), new String(passwordText.getPassword()), loginPanel));
-    }
+        frame.add(loginPanel);
+        frame.setVisible(true);
 
-    private static void handleLogin(String username, String password, JPanel loginPanel) {
-        User validatedUser = validateUserCredentials(username, password);
+        loginButton.addActionListener(e -> {
+            String username = userText.getText();
+            String password = new String(passwordText.getPassword());
+            currentUser = validateUserCredentials(username, password);
 
-        if (validatedUser != null) {
-            JOptionPane.showMessageDialog(loginPanel, LOGIN_SUCCESS_MESSAGE + validatedUser.username);
-            openDashboard(validatedUser);
-        } else {
-            JOptionPane.showMessageDialog(loginPanel, LOGIN_FAILURE_MESSAGE);
-        }
+            if (currentUser != null) {
+                JOptionPane.showMessageDialog(frame, "Login Successful! Welcome " + currentUser.getUsername());
+                frame.dispose();
+                openDashboard();
+            } else {
+                JOptionPane.showMessageDialog(frame, "Invalid username or password.");
+            }
+        });
     }
 
     private static User validateUserCredentials(String username, String password) {
         return USER_LIST.stream()
-                .filter(user -> user.username.equals(username) && user.password.equals(password))
+                .filter(user -> user.getUsername().equals(username) && user.getPassword().equals(password))
                 .findFirst()
                 .orElse(null);
     }
 
-    private static void openDashboard(User currentUser) {
-        JFrame dashboardFrame = new JFrame(currentUser.username + " Dashboard");
+    private static void openDashboard() {
+        JFrame dashboardFrame = new JFrame(currentUser.getUsername() + " Dashboard");
+        dashboardFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        dashboardFrame.setSize(600, 400);
 
+        JPanel dashboardPanel = new JPanel();
+        dashboardPanel.setLayout(new BorderLayout());
+
+        // Add real-time date and time label
+        JLabel dateTimeLabel = new JLabel("", JLabel.CENTER);
+        dateTimeLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        dateTimeLabel.setForeground(new Color(0, 105, 148));
+        dashboardPanel.add(dateTimeLabel, BorderLayout.NORTH);
+
+        // Update the date and time label every second
+        Timer timer = new Timer(1000, e -> {
+            String currentDateTime = getCurrentDateTime();
+            dateTimeLabel.setText(currentDateTime);
+        });
+        timer.start();
+
+        // Add specific content based on user role
         if (currentUser instanceof Admin) {
-            dashboardFrame.setContentPane(new AdminDashboard(currentUser));
-        } else if (currentUser instanceof Admin.Teacher) {
-            dashboardFrame.setContentPane(new TeacherDashboard());
-        } else {
-            dashboardFrame.setContentPane(new StudentDashboard());
+            dashboardPanel.add(new AdminDashboard((Admin) currentUser));
+        } else if (currentUser instanceof Teacher) {
+            dashboardPanel.add(new TeacherDashboard((Teacher) currentUser));
+        } else if (currentUser instanceof Student) {
+            dashboardPanel.add(new StudentDashboard((Student) currentUser));
         }
 
-        dashboardFrame.setSize(400, 300);
-        dashboardFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        dashboardFrame.add(dashboardPanel);
         dashboardFrame.setVisible(true);
+    }
+
+    private static String getCurrentDateTime() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return "Date & Time: " + now.format(formatter);
     }
 }
